@@ -4,10 +4,117 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>A-Frame VR Demo</title>
+    <script type="module" src="/main.js"></script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <!--script to import environment component to set up quick environment that is customizable-->
+    <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    <!--script addes animation control from a-frame extras-->
+    <script src="https://unpkg.com/lodash@4.17.20"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
+    <!--star system component for a-frame -->
+    <script src="https://cdn.rawgit.com/matthewbryancurtis/aframe-star-system-component/db4f1030/index.js"></script>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
+   <!-- <div id="app"></div>-->
+
+   <script>
+    /*
+* ~ SCHEMA ~
+*  color       <String>: color of the stars
+*  radius      <Number>: distance from center of sphere to first star sphere
+*  depth       <Number>: distance between star spheres
+*  starSize    <Number>: size of each individual star
+*  starCount   <Number>: number of stars per star sphere
+*  sphereCount <Number>: number of star spheres
+*  texture     <Asset>:  sprite used for individual stars
+*/
+
+AFRAME.registerComponent('star-system', {
+  schema: {
+    color: {
+      type: 'string',
+      default: "#FFF"
+    },
+    radius: {
+      type: 'number',
+      default: 300,
+      min: 0,
+    },
+    depth: {
+      type: 'number',
+      default: 300,
+      min: 0,
+    },
+    starSize: {
+      type: 'number',
+      default: 1,
+      min: 0,
+    },
+    count: {
+      type: 'number',
+      default: 10000,
+      min: 0,
+    },
+    texture: {
+      type: 'asset',
+      default: ''
+    }
+  },
+
+  update: function() {
+    // Check for and load star sprite
+    let texture = {};
+    if (this.data.texture) {
+      texture.transparent = true;
+      texture.map = new THREE.TextureLoader().load(this.data.texture);
+    }
+
+    const stars = new THREE.Geometry();
+
+    // Randomly create the vertices for the stars
+    while (stars.vertices.length < this.data.count) {
+        stars.vertices.push(this.randomVectorBetweenSpheres(this.data.radius, this.data.depth));
+    }
+
+    // Set the star display options
+    const starMaterial = new THREE.PointsMaterial(Object.assign(texture, {
+      color: this.data.color,
+      size: this.data.starSize
+    }));
+
+    // Add the star particles to the element
+    this.el.setObject3D('particle-system', new THREE.Points(stars, starMaterial));
+  },
+
+  // Returns a random vector between the inner sphere
+  // and the outer sphere created with radius + depth
+  randomVectorBetweenSpheres: function(radius, depth) {
+    const randomRadius = Math.floor(Math.random() * (radius + depth - radius + 1) + radius);
+    return this.randomSphereSurfaceVector(randomRadius);
+  },
+
+  // Returns a vector on the face of sphere with given radius
+  randomSphereSurfaceVector: function(radius) {
+    const theta = 2 * Math.PI * Math.random();
+    const phi = Math.acos(2 * Math.random() - 1);
+    const x = radius * Math.sin(phi) * Math.cos(theta);
+    const y = radius * Math.sin(phi) * Math.sin(theta);
+    const z = radius * Math.cos(phi);
+    return new THREE.Vector3(x, y, z);
+  }
+});
+   </script>
+       
+    <a-scene device-orientation-permission-ui="enabled: true" environment="preset: forest; grid: 2x2; gridColor: orange;
+     groundTexture: none; groundColor: none;">
+   
+    <!-- <a-star-system count="10000"></a-star-system>-->
+     <a-camera look-controls="enabled: true" orbit-controls="target: 0 2 0"></a-camera>    
+     <a-box src="https://art.pixilart.com/5026373cae2bc11.png"
+      position="-1 1 -10" rotation="0 45 0" scale="2 2 2" shadow animation="property: object3D.position.y; to:1.5; dur: 2000; loop: true; dir: alternate; ease: 0.5"></a-box>
+    </a-scene>
+    
   </body>
 </html>
