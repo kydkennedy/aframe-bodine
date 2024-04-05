@@ -107,13 +107,18 @@ AFRAME.registerComponent('star-system', {
 });
    </script>
        
-    <a-scene device-orientation-permission-ui="enabled: true" environment="preset: forest; grid: 2x2; gridColor: orange;
-     groundTexture: none; groundColor: none;">
-   
+    <a-scene stats device-orientation-permission-ui="enabled: true" environment="preset: forest; grid: 2x2; gridColor: orange;
+     groundTexture: none; groundColor: none">
+     <a-assets>
+      <img id="skyBox" src="../aframe-bodine/public/backgrounds/romeo-a-JrZvYuBYzCU-unsplash.jpg" />
+     </a-assets>  
     <!-- <a-star-system count="10000"></a-star-system>-->
      <a-camera look-controls="enabled: true" orbit-controls="target: 0 2 0"></a-camera>    
      <a-box src="https://art.pixilart.com/5026373cae2bc11.png"
       position="-1 1 -10" rotation="0 45 0" scale="2 2 2" shadow animation="property: object3D.position.y; to:1.5; dur: 2000; loop: true; dir: alternate; ease: 0.5"></a-box>
+      <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+        <a-sphere position="5 3 -13" color="mediumseagreen"></a-sphere>
+</a-entity>
     </a-scene>
     
   </body>
